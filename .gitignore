@@ -8,17 +8,26 @@
 
 # testing
 /coverage
+.venv
+._.venv
+**/.venv
+**/._.venv
 
 # next.js
 /.next/
 /out/
 
-# production
-/build
-
 # misc
-.DS_Store
 *.pem
+.vscode
+._.vscode
+**/.vscode
+**/._.vscode
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+~$*
 
 # debug
 npm-debug.log*
@@ -27,6 +36,14 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+._.env
+**/.env
+**/._.env
+.env*local
+._.env*local
+**/.env*local
+**/._.env*local
 
 # vercel
 .vercel
