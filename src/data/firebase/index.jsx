@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBRG8rnCFsbLQGZkYbRm9m8KYd4tk3z7x4",
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: "balance-ai-fa833.firebaseapp.com",
     databaseURL: "https://balance-ai-fa833-default-rtdb.firebaseio.com",
     projectId: "balance-ai-fa833",
