@@ -42,6 +42,7 @@ export default function RoomPage() {
 	return (
 		<div className="flex flex-col items-center min-h-screen p-4">
 			<Header hostName={roomData?.hostName || ''} />
+			      {/* QR 코드 생성 */}
 			<QRCodeGenerator roomId={roomId} />
 			<ParticipantList participants={participants} />
 			<StartGameButton />
