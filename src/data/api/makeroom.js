@@ -2,14 +2,21 @@
 
 import { ref, set, get } from 'firebase/database';
 import { database } from '@/data/firebase';
+import { QRCodeSVG } from 'qrcode.react';
+
 
 export async function createRoom(userName) {
     const roomId = `room-${Math.random().toString(36).substr(2, 9)}`;
+	const roomURL = `${window.location.origin}/${roomId}/join`;
+	const qrCode = 	<QRCodeSVG value={roomURL} size={200} />
+
+
     const roomData = {
         roomId,
         hostName: userName,
         participants: [userName],
         createdAt: new Date().toISOString(),
+		qrCodeURL: roomURL,
         expiresAt: new Date(Date.now() + 10 * 60 * 60 * 1000).toISOString(), // 10시간 후 만료
     };
 
