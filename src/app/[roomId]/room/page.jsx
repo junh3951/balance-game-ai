@@ -1,11 +1,11 @@
 // app/[roomId]/room/page.jsx
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { userNameState, participantsState, roomDataState } from '@/recoil/atoms'
-import { getRoomData } from '@/data/api/makeroom'
+import { getRoomData, addParticipant } from '@/data/api/makeroom'
 
 import Header from './_components/header'
 import QRCodeGenerator from './_components/qr_code_generator'
