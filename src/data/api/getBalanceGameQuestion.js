@@ -1,30 +1,32 @@
 // src/data/api/getBalanceGameQuestion.js
 
 export async function getCategoriesFromChatGPT() {
-	const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY; // 환경 변수에서 API 키 가져오기
-  
-	const response = await fetch('https://api.openai.com/v1/completions', {
-	  method: 'POST',
-	  headers: {
-		'Content-Type': 'application/json',
-		'Authorization': `Bearer ${apiKey}`,
-	  },
-	  body: JSON.stringify({
-		model: 'gpt-3.5-turbo',  // 사용할 모델
-		prompt: '밸런스 게임을 위한 카테고리를 5개 랜덤으로 나열해줘.',
-		max_tokens: 100,            // 응답의 최대 토큰 수
-		temperature: 0.7,           // 응답의 창의성 조절
-	  }),
-	});
-  
-	if (!response.ok) {
-	  throw new Error('ChatGPT API 요청 실패');
-	}
-  
-	const data = await response.json();
-	// 응답을 줄 단위로 나누어 배열로 반환 (각 줄에 하나의 카테고리가 있다고 가정)
-	return data.choices[0].text.trim().split('\n').filter(Boolean);
+  const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: '밸런스 게임을 위한 카테고리를 5개 랜덤으로 나열해줘.' }
+      ],
+      max_tokens: 100,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('ChatGPT API 요청 실패');
   }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim().split('\n').filter(Boolean);
+}
 
 // src/data/api/getBalanceGameQuestion.js
 export async function getBalanceGameQuestion(selectedCategories) {

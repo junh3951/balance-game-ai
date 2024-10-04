@@ -1,6 +1,6 @@
 // src/data/api/makeroom.js
 
-import { ref, set, get } from 'firebase/database';
+import { ref, set, get, update } from 'firebase/database';
 import { database } from '@/data/firebase';
 import { QRCodeSVG } from 'qrcode.react';
 
