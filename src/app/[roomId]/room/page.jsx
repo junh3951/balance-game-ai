@@ -39,13 +39,25 @@ export default function RoomPage() {
 		return () => clearInterval(interval)
 	}, [roomId, router, setParticipants, setRoomData])
 
+	// 현재 사용자가 호스트인지 확인하는 변수
+	const isHost = roomData?.hostName === userName
+
 	return (
 		<div className="flex flex-col items-center min-h-screen p-4">
 			<Header hostName={roomData?.hostName || ''} />
-			      {/* QR 코드 생성 */}
+			{/* QR 코드 생성 */}
 			<QRCodeGenerator roomId={roomId} />
-			<ParticipantList participants={participants} />
-			<StartGameButton />
+			<div className="mt-8" />
+			{/* 호스트 이름을 함께 전달 */}
+			<ParticipantList
+				participants={participants}
+				hostName={roomData?.hostName || ''}
+			/>
+
+			<div className="mb-32" />
+
+			{/* 호스트만 StartGameButton을 볼 수 있도록 조건부 렌더링 */}
+			{isHost && <StartGameButton />}
 		</div>
 	)
 }
