@@ -4,7 +4,7 @@
 export default function CategoryButton({
 	category,
 	isSelected,
-	toggleCategory,
+	toggleCategory
 }) {
 	return (
 		<button
@@ -15,5 +15,5 @@ export default function CategoryButton({
 		>
 			{category}
 		</button>
-	)
+	);
 }

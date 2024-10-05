@@ -29,7 +29,7 @@ export default function JoinPage() {
         
         if (response.status === 200) {
             // 참가가 완료되면 해당 방으로 리디렉션
-            router.push(`/${roomId}`)
+            router.push(`/${roomId}/room`)
         } else {
             alert('방에 참가할 수 없습니다.')
         }
