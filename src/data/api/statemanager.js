@@ -39,13 +39,29 @@ export async function setSelectedCategory(roomId, selectedCategory) {
 	}
 }
 
-// 카테고리 선택 감지
-export function onCategoryChange(roomId, callback) {
-	const categoryRef = ref(database, `rooms/${roomId}/selectedCategory`)
-	onValue(categoryRef, (snapshot) => {
-		const selectedCategory = snapshot.val()
-		if (selectedCategory) {
-			callback(selectedCategory)
+// 카테고리 클릭 저장
+export async function saveCategoryClick(roomId, category) {
+	try {
+		await update(ref(database, `rooms/${roomId}/lastClickedCategory`), {
+			category: category,
+			timestamp: Date.now(), // 항상 새로운 값으로 업데이트
+		})
+		console.log(`Category "${category}" clicked in room ${roomId}`)
+	} catch (error) {
+		console.error('Error saving category click:', error)
+	}
+}
+
+// 카테고리 클릭 변경 감지
+export function onCategoryClickChange(roomId, callback) {
+	const categoryClickRef = ref(
+		database,
+		`rooms/${roomId}/lastClickedCategory`,
+	)
+	onValue(categoryClickRef, (snapshot) => {
+		const data = snapshot.val()
+		if (data) {
+			callback(data.category) // 클릭된 카테고리를 콜백으로 전달
 		}
 	})
 }

@@ -1,0 +1,54 @@
+.trafficlight-horizontal {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	background: #222;
+	background-image: linear-gradient(
+		transparent 2%,
+		#111 2%,
+		transparent 3%,
+		#111 30%
+	);
+	border-radius: 12px; /* 3/5 크기 */
+	position: relative;
+	border: solid 3px #333; /* 3/5 크기 */
+}
+
+.light {
+	width: 60px; /* 3/5 크기 */
+	height: 60px; /* 3/5 크기 */
+	border-radius: 50%;
+	position: relative;
+	margin: 0 12px; /* 3/5 크기 */
+	top: 10px;
+	box-shadow: 0 0 12px #111 inset; /* 기본 상태에서는 불이 꺼져 있음 */
+}
+
+.red-horizontal {
+	background: red;
+	background-image: radial-gradient(brown, transparent);
+	background-size: 3px 3px;
+	border: dotted 1px red;
+}
+
+.yellow-horizontal {
+	background: yellow;
+	background-image: radial-gradient(orange, transparent);
+	background-size: 3px 3px;
+	border: dotted 1px yellow;
+}
+
+.green-horizontal {
+	background: green;
+	background-image: radial-gradient(lime, transparent);
+	background-size: 3px 3px;
+	border: dotted 1px lime;
+}
+
+.light-on {
+	box-shadow: 0 0 12px #fff inset, 0 0 6px #fff; /* 불이 켜졌을 때 */
+}
+
+.light-off {
+	opacity: 0.2; /* 불이 꺼졌을 때 어둡게 표시 */
+}
