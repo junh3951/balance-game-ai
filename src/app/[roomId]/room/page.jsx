@@ -1,11 +1,12 @@
-// app/[roomId]/room/page.jsx
 'use client'
 
 import { useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { userNameState, participantsState, roomDataState } from '@/recoil/atoms'
-import { getRoomData } from '@/data/api/makeroom'
+import { onStageChange } from '@/data/api/statemanager'
+import { onValue, ref } from 'firebase/database'
+import { database } from '@/data/firebase'
 
 import Header from './_components/header'
 import QRCodeGenerator from './_components/qr_code_generator'
@@ -19,28 +20,36 @@ export default function RoomPage() {
 	const [participants, setParticipants] = useRecoilState(participantsState)
 	const [roomData, setRoomData] = useRecoilState(roomDataState)
 
+	// Firebase에서 room 데이터와 참가자 목록을 실시간으로 가져오기
 	useEffect(() => {
-		async function fetchRoomData() {
-			const response = await getRoomData(roomId)
-			if (response.status === 200) {
-				setRoomData(response.roomData)
-				setParticipants(response.roomData.participants)
+		const roomRef = ref(database, `rooms/${roomId}`)
+		const unsubscribe = onValue(roomRef, (snapshot) => {
+			const roomData = snapshot.val()
+			if (roomData) {
+				setRoomData(roomData)
+				setParticipants(roomData.participants || [])
 			} else {
 				alert('방을 찾을 수 없습니다.')
 				router.push('/')
 			}
-		}
+		})
 
-		fetchRoomData()
-
-		// 실시간 업데이트를 위해 주기적으로 데이터를 가져옵니다.
-		const interval = setInterval(fetchRoomData, 5000)
-
-		return () => clearInterval(interval)
+		// 컴포넌트 언마운트 시 Firebase 구독 해제
+		return () => unsubscribe()
 	}, [roomId, router, setParticipants, setRoomData])
 
 	// 현재 사용자가 호스트인지 확인하는 변수
 	const isHost = roomData?.hostName === userName
+
+	// 게임 단계가 변경될 때 감지
+	useEffect(() => {
+		onStageChange(roomId, (currentStage) => {
+			if (currentStage === 'category') {
+				// 게임이 카테고리 단계로 이동하면 해당 페이지로 이동
+				router.push(`/${roomId}/category`)
+			}
+		})
+	}, [roomId, router])
 
 	return (
 		<div className="flex flex-col items-center min-h-screen p-4">

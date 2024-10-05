@@ -1,10 +1,9 @@
-// app/[roomId]/category/_components/category_button.jsx
 'use client'
 
 export default function CategoryButton({
 	category,
 	isSelected,
-	toggleCategory
+	toggleCategory,
 }) {
 	return (
 		<button
@@ -15,5 +14,5 @@ export default function CategoryButton({
 		>
 			{category}
 		</button>
-	);
+	)
 }
