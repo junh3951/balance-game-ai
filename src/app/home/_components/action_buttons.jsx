@@ -29,19 +29,30 @@ export default function ActionButtons({ isActive }) {
 			<button
 				onClick={handleCreateRoom}
 				disabled={!isActive}
-				className={`p-2 w-32 bg-blue-500 text-white rounded ${
-					!isActive && 'opacity-50 pointer-events-none'
+				className={`button w-40 h-16 rounded-lg select-none transition-all duration-150 border-b-[1px] ${
+					isActive
+						? 'bg-gradient-to-r from-sky-500 to-blue-600 cursor-pointer text-white [box-shadow:0_10px_0_0_#1b6ff8,0_15px_0_0_#1b70f841] active:translate-y-2 active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841] active:border-b-[0px] border-blue-400'
+						: 'bg-gray-400 cursor-not-allowed text-gray-200 border-gray-400'
 				}`}
+				role="button"
 			>
-				방만들기
+				<span className="flex flex-col justify-center items-center h-full font-bold text-lg">
+					방만들기
+				</span>
 			</button>
 			<button
 				onClick={handleGotoCommunity}
-				className={`p-2 w-32 bg-green-500 text-white rounded ${
-					!isActive && 'opacity-50 pointer-events-none'
+				disabled={!isActive}
+				className={`button w-40 h-16 rounded-lg select-none transition-all duration-150 border-b-[1px] ${
+					isActive
+						? 'bg-gradient-to-r from-sky-500 to-blue-600 cursor-pointer text-white [box-shadow:0_10px_0_0_#1b6ff8,0_15px_0_0_#1b70f841] active:translate-y-2 active:[box-shadow:0_0px_0_0_#1b6ff8,0_0px_0_0_#1b70f841] active:border-b-[0px] border-blue-400'
+						: 'bg-gray-400 cursor-not-allowed text-gray-200 border-gray-400'
 				}`}
+				role="button"
 			>
-				커뮤니티
+				<span className="flex flex-col justify-center items-center h-full font-bold text-lg">
+					커뮤니티
+				</span>
 			</button>
 		</div>
 	)
