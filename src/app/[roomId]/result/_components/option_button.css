@@ -1,0 +1,21 @@
+.option-button {
+	display: flex;
+	width: 180px;
+	height: 454px;
+	padding: 100px 31px;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 20px;
+	flex-shrink: 0;
+	box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2),
+		0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+	transition: height 0.8s ease-in-out, opacity 0.8s ease-in-out;
+	opacity: 0; /* 처음에 투명하게 시작 */
+	height: 454px; /* 기본 height */
+}
+
+.option-button.visible {
+	opacity: 1; /* 보이게 변경 */
+	height: 120px; /* 최종적으로 수축되는 height */
+}

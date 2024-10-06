@@ -1,0 +1,30 @@
+/* src/app/[roomId]/balance-game/_components/option_button.css */
+
+.option-button {
+	display: flex;
+	width: 180px;
+	height: 454px;
+	padding: 100px 31px;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 20px;
+	flex-shrink: 0;
+	box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.2),
+		0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+	transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+	opacity: 0; /* 처음에 투명하게 시작 */
+}
+
+.option-button.left {
+	transform: translateX(-1000px); /* 왼쪽에서 날아옴 */
+}
+
+.option-button.right {
+	transform: translateX(1000px); /* 오른쪽에서 날아옴 */
+}
+
+.option-button.visible {
+	opacity: 1; /* 보이게 변경 */
+	transform: translateX(0); /* 가운데로 이동 */
+}
