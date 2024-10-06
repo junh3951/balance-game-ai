@@ -1,3 +1,4 @@
+// src/app/[roomId]/room/page.jsx
 'use client'
 
 import { useEffect } from 'react'
@@ -27,7 +28,11 @@ export default function RoomPage() {
 			const roomData = snapshot.val()
 			if (roomData) {
 				setRoomData(roomData)
-				setParticipants(roomData.participants || [])
+				// 참가자 이름 배열 생성
+				const participantNames = (roomData.participants || []).map(
+					(participant) => participant.id,
+				)
+				setParticipants(participantNames)
 			} else {
 				alert('방을 찾을 수 없습니다.')
 				router.push('/')

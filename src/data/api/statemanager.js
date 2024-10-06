@@ -2,11 +2,71 @@
 import { ref, set, update, get, onValue } from 'firebase/database'
 import { database } from '@/data/firebase'
 
+// 유저별 카테고리 선택 저장
+export async function setSelectedCategory(roomId, userName, selectedCategory) {
+	try {
+		const roomRef = ref(database, `rooms/${roomId}`)
+		const snapshot = await get(roomRef)
+
+		if (snapshot.exists()) {
+			const roomData = snapshot.val()
+			const participants = roomData.participants
+
+			// 참가자 찾기
+			const participantIndex = participants.findIndex(
+				(participant) => participant.id === userName,
+			)
+
+			if (participantIndex !== -1) {
+				// `selectedCategory` 업데이트
+				participants[participantIndex].selectedCategory =
+					selectedCategory
+
+				// Firebase에 참가자 업데이트
+				await update(roomRef, {
+					participants: participants,
+				})
+
+				// 모든 참가자가 선택했는지 확인
+				await checkAllParticipantsSelected(roomId)
+			}
+		}
+	} catch (error) {
+		console.error('Error setting selected category for participant:', error)
+	}
+}
+
+async function checkAllParticipantsSelected(roomId) {
+	try {
+		const roomRef = ref(database, `rooms/${roomId}`)
+		const snapshot = await get(roomRef)
+
+		if (snapshot.exists()) {
+			const roomData = snapshot.val()
+			const participants = roomData.participants
+
+			const allSelected = participants.every(
+				(participant) => participant.selectedCategory !== null,
+			)
+
+			if (allSelected) {
+				await setGameStage(roomId, 'game') // 게임 단계로 이동
+				console.log(
+					'All participants selected categories. Moving to game stage.',
+				)
+			}
+		}
+	} catch (error) {
+		console.error('Error checking participants selected categories:', error)
+	}
+}
+
 // 단계 설정 (room -> category -> game -> result)
 export async function setGameStage(roomId, stage) {
 	try {
-		await update(ref(database, `rooms/${roomId}`), {
-			stage: stage, // 현재 단계를 저장
+		const roomRef = ref(database, `rooms/${roomId}`)
+		await update(roomRef, {
+			stage: stage,
 		})
 		console.log(`Game stage set to ${stage} for room ${roomId}`)
 	} catch (error) {
@@ -23,20 +83,6 @@ export function onStageChange(roomId, callback) {
 			callback(currentStage) // 현재 단계를 반환
 		}
 	})
-}
-
-// 카테고리 선택 저장
-export async function setSelectedCategory(roomId, selectedCategory) {
-	try {
-		await update(ref(database, `rooms/${roomId}`), {
-			selectedCategory: selectedCategory,
-		})
-		console.log(
-			`Category "${selectedCategory}" selected for room ${roomId}`,
-		)
-	} catch (error) {
-		console.error('Error setting selected category:', error)
-	}
 }
 
 // 카테고리 클릭 저장

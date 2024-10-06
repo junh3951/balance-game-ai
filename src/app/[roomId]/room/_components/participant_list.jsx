@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-// 색상 목록을 정의하여 랜덤하게 선택될 수 있도록 함
+// Define colors for random highlighting
 const colors = [
 	'border-red-500 text-red-500',
 	'border-green-500 text-green-500',
@@ -17,17 +17,18 @@ const colors = [
 export default function ParticipantList({ participants, hostName }) {
 	const [highlightedParticipants, setHighlightedParticipants] = useState([])
 
-	// 3초 간격으로 랜덤하게 25%의 참가자에게 스타일을 적용
+	// Randomly highlight 25% of participants every 3 seconds
 	useEffect(() => {
 		const interval = setInterval(() => {
 			const totalParticipants = participants.length
 			const numberToHighlight = Math.ceil(totalParticipants * 0.25) // 25% 선택
 
-			// 호스트는 선택 대상에서 제외
+			// Exclude the host from selection
 			const filteredParticipants = participants.filter(
 				(participant) => participant !== hostName,
 			)
 
+			// Shuffle and pick participants to highlight
 			const shuffledParticipants = [...filteredParticipants].sort(
 				() => 0.5 - Math.random(),
 			)
@@ -36,10 +37,10 @@ export default function ParticipantList({ participants, hostName }) {
 				numberToHighlight,
 			)
 
-			// 랜덤한 테두리와 글자 색상 적용
+			// Apply random border and text color
 			const highlighted = selectedParticipants.map((participant) => ({
 				name: participant,
-				color: colors[Math.floor(Math.random() * colors.length)], // 랜덤 색상 선택
+				color: colors[Math.floor(Math.random() * colors.length)], // Pick random color
 			}))
 
 			setHighlightedParticipants(highlighted)
@@ -61,7 +62,7 @@ export default function ParticipantList({ participants, hostName }) {
 			</h2>
 			<div className="flex flex-wrap justify-center gap-2">
 				{participants.map((participant, index) => {
-					// 해당 참가자가 하이라이트 상태인지 확인하고, 스타일을 적용
+					// Check if participant is highlighted
 					const highlighted = highlightedParticipants.find(
 						(p) => p.name === participant,
 					)
@@ -73,12 +74,12 @@ export default function ParticipantList({ participants, hostName }) {
                 m-1 transform cursor-pointer rounded-full px-4 py-1 text-lg transition-transform duration-300 ease-in-out
                 ${
 					participant === hostName
-						? 'bg-[#4a4a4a] text-yellow-500' // 호스트 스타일 유지
+						? 'bg-[#4a4a4a] text-yellow-500' // Host style
 						: 'bg-white border-2 text-black'
 				}
                 ${
 					highlighted
-						? `bg-transparent ${highlighted.color} scale-110` // 랜덤 색상 테두리와 글자 색 적용
+						? `bg-transparent ${highlighted.color} scale-110`
 						: ''
 				}
               `}

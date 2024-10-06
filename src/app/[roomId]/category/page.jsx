@@ -4,15 +4,17 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation' // roomId 가져오기
 import { useRecoilState } from 'recoil'
-import { selectedCategoriesState } from '@/recoil/atoms'
+import { selectedCategoriesState, userNameState } from '@/recoil/atoms'
 import CategoryButton from './_components/category_button'
 import Header from './_components/header'
 import TrafficLight from './_components/traffic_light'
+import { setSelectedCategory, onStageChange } from '@/data/api/statemanager'
 
 export default function CategoryPage() {
 	const [selectedCategories, setSelectedCategories] = useRecoilState(
 		selectedCategoriesState,
 	)
+	const [userName] = useRecoilState(userNameState)
 	const router = useRouter()
 	const { roomId } = useParams() // roomId 가져오기
 	const categories = ['순한맛', '중간맛', '매운맛'] // 주제 자극도 설정
@@ -23,13 +25,23 @@ export default function CategoryPage() {
 	}, [])
 
 	// 카테고리 선택 토글
-	const toggleCategory = (category) => {
+	const toggleCategory = async (category) => {
 		setSelectedCategories([category]) // 한 번에 하나의 카테고리만 선택 가능
+
+		// Firebase에 유저별 선택된 카테고리 저장
+		await setSelectedCategory(roomId, userName, category)
 	}
 
+	// 게임 단계로 이동
 	useEffect(() => {
-		console.log('선택된 카테고리:', selectedCategories) // 상태 확인용
-	}, [selectedCategories])
+		const handleStageChange = (stage) => {
+			if (stage === 'game') {
+				router.push(`/${roomId}/balance-game`) // 게임 단계로 이동
+			}
+		}
+
+		onStageChange(roomId, handleStageChange) // 게임 단계 감지
+	}, [roomId, router])
 
 	return (
 		<div className="flex flex-col items-center min-h-screen p-4">

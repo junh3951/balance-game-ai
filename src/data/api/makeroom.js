@@ -12,7 +12,12 @@ export async function createRoom(userName) {
 	const roomData = {
 		roomId,
 		hostName: userName,
-		participants: [userName],
+		participants: [
+			{
+				id: userName,
+				selectedCategory: null, // 카테고리 초기화
+			},
+		],
 		createdAt: new Date().toISOString(),
 		qrCodeURL: roomURL,
 		expiresAt: new Date(Date.now() + 10 * 60 * 60 * 1000).toISOString(), // 10시간 후 만료
@@ -22,6 +27,43 @@ export async function createRoom(userName) {
 	await set(ref(database, `rooms/${roomId}`), roomData)
 	console.log('room created with data:', roomData)
 	return { status: 200, roomData }
+}
+
+export async function addParticipant(roomId, userName) {
+	try {
+		const roomRef = ref(database, `rooms/${roomId}`)
+		const snapshot = await get(roomRef)
+
+		if (snapshot.exists()) {
+			const roomData = snapshot.val()
+
+			// 참가자 중복 확인
+			const participantExists = roomData.participants.some(
+				(participant) => participant.id === userName,
+			)
+
+			if (!participantExists) {
+				// 새로운 참가자 객체 생성
+				const newParticipant = {
+					id: userName,
+					selectedCategory: null,
+				}
+
+				roomData.participants.push(newParticipant)
+
+				// Firebase에 참가자 업데이트
+				await update(roomRef, {
+					participants: roomData.participants,
+				})
+			}
+			return { status: 200, roomData }
+		} else {
+			return { status: 404, error: 'Room not found' }
+		}
+	} catch (error) {
+		console.error('Error adding participant:', error)
+		return { status: 500, error: 'Failed to add participant' }
+	}
 }
 
 export async function getRoomData(roomId) {
@@ -41,32 +83,5 @@ export async function getRoomData(roomId) {
 	} catch (error) {
 		console.error('Error fetching room data from Firebase:', error)
 		return { status: 500, error: 'Failed to fetch room data' }
-	}
-}
-
-export async function addParticipant(roomId, userName) {
-	try {
-		const roomRef = ref(database, `rooms/${roomId}`)
-		const snapshot = await get(roomRef)
-
-		if (snapshot.exists()) {
-			const roomData = snapshot.val()
-
-			// 참가자가 중복되지 않도록 체크
-			if (!roomData.participants.includes(userName)) {
-				roomData.participants.push(userName)
-
-				// Firebase에 참가자 업데이트
-				await update(ref(database, `rooms/${roomId}`), {
-					participants: roomData.participants,
-				})
-			}
-			return { status: 200, roomData }
-		} else {
-			return { status: 404, error: 'Room not found' }
-		}
-	} catch (error) {
-		console.error('Error adding participant:', error)
-		return { status: 500, error: 'Failed to add participant' }
 	}
 }
