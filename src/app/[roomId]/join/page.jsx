@@ -6,6 +6,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { useRecoilState } from 'recoil'
 import { userNameState } from '@/recoil/atoms'
 import { addParticipant } from '@/data/api/makeroom'
+import NameInput from './_components/name_input'
+import EnterButton from './_components/enter_button'
 
 export default function JoinPage() {
 	const router = useRouter()
@@ -62,28 +64,15 @@ export default function JoinPage() {
 
 			{/* Name Input Section */}
 			<div className="mb-8">
-				<input
-					type="text"
-					value={userName}
-					onChange={(e) => setUserName(e.target.value)}
-					placeholder="이름을 입력하세요"
-					className="border border-gray-300 rounded-md p-2 text-center w-full"
-				/>
+				<NameInput name={userName} setName={setUserName} />
 			</div>
 
 			{/* Join Room Button */}
-			<div className="mb-32">
-				<button
-					onClick={joinRoom}
-					className={`${
-						loading
-							? 'bg-gray-400'
-							: 'bg-blue-500 hover:bg-blue-600'
-					} text-white px-4 py-2 rounded-md w-full`}
-					disabled={loading}
-				>
-					{loading ? '참가 중...' : '참가하기'}
-				</button>
+			<div className="w-full flex justify-center mb-32">
+				<EnterButton
+					isActive={userName.trim() !== '' && !loading}
+					onEnter={joinRoom}
+				/>
 			</div>
 		</div>
 	)

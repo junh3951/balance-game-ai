@@ -4,7 +4,7 @@ export default function EnterButton({ isActive, onEnter }) {
 	return (
 		<div className="fixed bottom-0 pb-8 w-full flex justify-center">
 			<div
-				className={`flex mt-4 space-x-4 transition-transform duration-150 ${
+				className={`mt-4 transition-transform duration-150 ${
 					isActive ? 'translate-y-[-10px]' : 'translate-y-0'
 				}`}
 			>
