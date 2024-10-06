@@ -57,20 +57,28 @@ export async function setSelectedCategory(roomId, userName, selectedCategory) {
 
 async function checkAllParticipantsSelected(roomId) {
 	try {
-		const roomRef = ref(database, `rooms/${roomId}`)
+		const roomRef = ref(database, `rooms/${roomId}/participants`)
 		const snapshot = await get(roomRef)
 
 		if (snapshot.exists()) {
-			const roomData = snapshot.val()
-			const participants = roomData.participants
+			const participants = snapshot.val()
 
-			const allSelected = participants.every(
-				(participant) => participant.selectedCategory !== null,
+			// Iterate over each participant's ID and check if selectedCategory exists and is not null
+			const allSelected = Object.keys(participants).every(
+				(participantId) => {
+					const selectedCategory =
+						participants[participantId]?.selectedCategory
+					return (
+						selectedCategory !== null &&
+						selectedCategory !== undefined
+					)
+				},
 			)
 
 			if (allSelected) {
+				// Call other functions once all participants have selected a category
 				await determineSelectedCategory(roomId)
-				await setGameStage(roomId, 'game') // 게임 단계로 이동
+				await setGameStage(roomId, 'game') // Move to the game stage
 				console.log(
 					'All participants selected categories. Moving to game stage.',
 				)
@@ -253,7 +261,6 @@ export function onOptionClickChange(roomId, callback) {
 	})
 }
 
-// 모든 참가자가 옵션을 선택했는지 확인
 export async function checkAllParticipantsSelectedOption(roomId) {
 	try {
 		const roomRef = ref(database, `rooms/${roomId}/participants`)
@@ -261,13 +268,24 @@ export async function checkAllParticipantsSelectedOption(roomId) {
 
 		if (snapshot.exists()) {
 			const participants = snapshot.val()
-			const allSelected = Object.values(participants).every(
-				(participant) => participant.selectedOption !== null,
+
+			// Check if every participant has a valid 'selectedOption'
+			const allSelected = Object.keys(participants).every(
+				(participantId) => {
+					const selectedOption =
+						participants[participantId]?.selectedOption
+					return (
+						selectedOption !== null && selectedOption !== undefined
+					)
+				},
 			)
 
 			if (allSelected) {
 				await determineSelectedOption(roomId) // 결과 결정
 				await setGameStage(roomId, 'result') // 게임 단계로 이동
+				console.log(
+					'All participants have selected options. Moving to result stage.',
+				)
 			}
 		}
 	} catch (error) {
