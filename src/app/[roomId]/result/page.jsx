@@ -13,6 +13,7 @@ import { userNameState, roomDataState } from '@/recoil/atoms'
 import Header from './_components/header'
 import OptionButton from './_components/option_button'
 import ActionButtons from './_components/action_buttons'
+import ActionButtons2 from './_components/action_buttons2'
 
 export default function ResultPage() {
 	const router = useRouter()
