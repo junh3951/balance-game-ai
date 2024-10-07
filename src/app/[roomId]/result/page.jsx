@@ -96,7 +96,7 @@ export default function ResultPage() {
 			return (
 				<Header
 					text={questionData?.question}
-					finalOption="이븐하게 익었네요..(무승부)"
+					finalOption="Even하게 익었네요..(무승부)"
 				/>
 			)
 		}
@@ -188,7 +188,6 @@ export default function ResultPage() {
 
 			{/* 호스트에게만 ActionButtons 표시 */}
 			{isHost && <ActionButtons roomId={roomId} />}
-			{!isHost && <ActionButtons2 roomId={roomId} />}
 
 			{/* 로딩이 끝나면 결과 표시, 그 전까지는 로딩 중 메시지 표시 */}
 
