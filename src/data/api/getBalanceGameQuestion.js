@@ -293,11 +293,11 @@ export async function generateBalanceGameQuestion(roomId, level, isHost) {
 						content: JSON.stringify({ level: level }),
 					},
 				],
-				temperature: 1.1,
+				temperature: 1.1, // 온도를 높이면 더 창의적이고 다양한 결과를 유도할 수 있음
 				max_tokens: 4095,
 				top_p: 1,
-				frequency_penalty: 0,
-				presence_penalty: 0,
+				frequency_penalty: 0.4, // 자주 반복되는 단어를 피함
+				presence_penalty: 0.5, // 새로운 단어를 더 자주 사용하도록 유도
 				response_format: {
 					type: 'json_object',
 				},
