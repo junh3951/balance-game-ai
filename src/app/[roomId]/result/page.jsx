@@ -167,7 +167,9 @@ export default function ResultPage() {
 
 				<div className="mt-8">
 					{loading ? (
-						<p>결과를 불러오는 중입니다...</p>
+						<div className="flex items-center justify-center min-h-screen">
+							<span className="loader"></span>
+						</div>
 					) : (
 						renderFinalResult()
 					)}
@@ -188,8 +190,6 @@ export default function ResultPage() {
 
 			{/* 호스트에게만 ActionButtons 표시 */}
 			{isHost && <ActionButtons roomId={roomId} />}
-
-			{/* 로딩이 끝나면 결과 표시, 그 전까지는 로딩 중 메시지 표시 */}
 
 			<div className="mt-32"></div>
 		</div>

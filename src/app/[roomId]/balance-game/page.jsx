@@ -185,7 +185,7 @@ export default function BalanceGamePage() {
 									</button>
 									<button
 										onClick={handleRegen}
-										className="ml-4 mb-2 w-auto h-auto px-4 rounded-full select-none transition-all duration-150 border-b-[1px] bg-gradient-to-r from-[#B8860B] to-[#DAA520] cursor-pointer text-white [box-shadow:0_10px_0_0_#B8860B,0_15px_0_0_#DAA520] active:translate-y-2 active:[box-shadow:0_0px_0_0_#B8860B,0_0px_0_0_#DAA520] active:border-b-[0px] border-[#A67C00] hover:bg-gradient-to-r hover:from-[#DAA520] hover:to-[#B8860B] focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-opacity-50"
+										className="ml-4 mb-2 w-auto h-auto px-4 rounded-full select-none transition-transform ease-out duration-75 border-b-[1px] bg-gradient-to-r from-[#B8860B] to-[#DAA520] cursor-pointer text-white [box-shadow:0_10px_0_0_#B8860B,0_15px_0_0_#DAA520] active:translate-y-2 active:[box-shadow:0_0px_0_0_#B8860B,0_0px_0_0_#DAA520] active:border-b-[0px] border-[#A67C00] hover:bg-gradient-to-r hover:from-[#DAA520] hover:to-[#B8860B] focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-opacity-50"
 									>
 										<span className="flex flex-col justify-center items-center font-bold text-xl">
 											⟳
@@ -198,7 +198,9 @@ export default function BalanceGamePage() {
 				</>
 			) : (
 				// 로딩 중이지만 이전 데이터가 없을 경우만 표시
-				<div>질문을 불러오는 중입니다...</div>
+				<div className="flex items-center justify-center min-h-screen">
+					<span className="loader"></span>
+				</div>
 			)}
 		</div>
 	)
