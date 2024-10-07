@@ -4,7 +4,7 @@
 import { useRouter } from 'next/navigation'
 import { useRecoilValue } from 'recoil'
 import { userNameState } from '@/recoil/atoms'
-import { setGameStage } from '@/data/api/statemanager'
+import { setGameStage, resetGame } from '@/data/api/statemanager'
 
 export default function ActionButtons({ roomId }) {
 	const router = useRouter()
@@ -16,8 +16,13 @@ export default function ActionButtons({ roomId }) {
 	}
 
 	const handlePlayAgain = async () => {
-		// 게임 단계를 category로 설정
-		await setGameStage(roomId, 'category')
+		const resetResponse = await resetGame(roomId)
+		if (resetResponse.status === 200) {
+			// 게임 단계를 category로 설정
+			await setGameStage(roomId, 'category')
+		} else {
+			setError('게임을 다시 설정하는 중 오류가 발생했습니다.')
+		}
 	}
 
 	return (

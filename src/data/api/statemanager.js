@@ -1,5 +1,5 @@
 // src/data/api/statemanager.js
-import { ref, set, update, get, onValue } from 'firebase/database'
+import { ref, set, update, get, remove, onValue } from 'firebase/database'
 import { database } from '@/data/firebase'
 
 // roomData를 가져오는 함수 추가
@@ -414,6 +414,42 @@ export async function trackOptionSelection(roomId, callback) {
 		})
 	} catch (error) {
 		console.error('Error tracking option selection:', error)
+	}
+}
+
+// Function to reset the game for a new round
+export async function resetGame(roomId) {
+	try {
+		// Clear the final result and balance game question
+		await remove(ref(database, `rooms/${roomId}/finalResult`))
+		await remove(ref(database, `rooms/${roomId}/balanceGameQuestion`))
+		await remove(ref(database, `rooms/${roomId}/selectedCategory`))
+
+		// Clear selectedCategory and selectedOption for each participant
+		const participantsRef = ref(database, `rooms/${roomId}/participants`)
+		const snapshot = await get(participantsRef)
+		if (snapshot.exists()) {
+			const participants = snapshot.val()
+			for (const participantId in participants) {
+				// Clear selectedCategory and selectedOption for each participant
+				await update(
+					ref(
+						database,
+						`rooms/${roomId}/participants/${participantId}`,
+					),
+					{
+						selectedCategory: null,
+						selectedOption: null,
+					},
+				)
+			}
+		}
+
+		console.log(`Room ${roomId} has been reset for a new round.`)
+		return { status: 200 }
+	} catch (error) {
+		console.error('Error resetting the game:', error)
+		return { status: 500, error: 'Failed to reset the game.' }
 	}
 }
 

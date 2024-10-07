@@ -126,6 +126,14 @@ export default function ResultPage() {
 					/>
 				</div>
 
+				<div className="mt-8">
+					{loading ? (
+						<p>결과를 불러오는 중입니다...</p>
+					) : (
+						renderFinalResult()
+					)}
+				</div>
+
 				{/* 각 옵션을 선택한 사람들 표시 */}
 				<div className="flex flex-col items-center gap-4">
 					<div className="p-4 rounded shadow-md w-80">
@@ -148,13 +156,7 @@ export default function ResultPage() {
 			{!isHost && <ActionButtons2 roomId={roomId} />}
 
 			{/* 로딩이 끝나면 결과 표시, 그 전까지는 로딩 중 메시지 표시 */}
-			<div className="mt-8">
-				{loading ? (
-					<p>결과를 불러오는 중입니다...</p>
-				) : (
-					renderFinalResult()
-				)}
-			</div>
+
 			<div className="mt-32"></div>
 		</div>
 	)
