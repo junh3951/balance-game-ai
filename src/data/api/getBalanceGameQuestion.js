@@ -1,4 +1,3 @@
-// src/data/api/getBalanceGameQuestion.js
 import { ref, set, get, remove } from 'firebase/database'
 import { database } from '@/data/firebase'
 import OpenAI from 'openai'
@@ -50,27 +49,35 @@ export async function getSelectedCategory(roomId) {
 // GPT-4를 사용하여 밸런스 게임 질문을 생성하는 함수
 export async function getOrGenerateBalanceGameQuestion(roomId, level, isHost) {
 	try {
-		// Reference to the question in the database
-		const questionRef = ref(database, `rooms/${roomId}/balanceGameQuestion`)
-		const snapshot = await get(questionRef)
-		if (snapshot.exists()) {
-			// Question already exists, return it
-			const questionData = snapshot.val()
+		// Reference to the last question in the database
+		const lastQuestionRef = ref(
+			database,
+			`rooms/${roomId}/balanceGameQuestion`,
+		)
+		const lastQuestionSnapshot = await get(lastQuestionRef)
+		let lastQuestion = null
+
+		if (lastQuestionSnapshot.exists()) {
+			lastQuestion = lastQuestionSnapshot.val()
 			console.log(
 				`Fetched existing balance game question for room ${roomId}:`,
-				questionData,
+				lastQuestion,
 			)
-			return { status: 200, questionData }
-		} else {
-			// If user is not the host, they should wait for the host to generate the question
-			if (!isHost) {
-				return {
-					status: 202,
-					message: 'Waiting for host to generate the question.',
-				}
-			}
+		}
 
-			// 시스템 프롬프트 설정
+		// If user is not the host, they should wait for the host to generate the question
+		if (!isHost && lastQuestion) {
+			return {
+				status: 200,
+				questionData: lastQuestion, // 기존 질문이 있을 경우 이를 반환
+			}
+		}
+
+		let newQuestionData
+		let attempts = 0
+
+		do {
+			// GPT-4로 새로운 질문 생성 요청
 			const systemPrompt = `
 ---
 ### 역할부여  
@@ -279,9 +286,9 @@ export async function getOrGenerateBalanceGameQuestion(roomId, level, isHost) {
   "option1": "평생 동안 차가운 물로만 샤워하기",
   "option2": "평생 동안 뜨거운 물로만 샤워하기"
 }
-`
+` // 시스템 프롬프트 (이전 예시와 동일)
 			const response = await openai.chat.completions.create({
-				model: 'gpt-4o', // 모델 이름은 필요에 따라 변경하세요
+				model: 'gpt-4o',
 				messages: [
 					{
 						role: 'system',
@@ -292,33 +299,48 @@ export async function getOrGenerateBalanceGameQuestion(roomId, level, isHost) {
 						content: JSON.stringify({ level: level }),
 					},
 				],
-				temperature: 1.1, // 온도를 높이면 더 창의적이고 다양한 결과를 유도할 수 있음
+				temperature: 1.1, // 온도를 높여 창의적 결과 유도
 				max_tokens: 4095,
 				top_p: 1,
-				frequency_penalty: 0.4, // 자주 반복되는 단어를 피함
-				presence_penalty: 0.5, // 새로운 단어를 더 자주 사용하도록 유도
+				frequency_penalty: 0.4,
+				presence_penalty: 0.5,
 				response_format: {
 					type: 'json_object',
 				},
 			})
 
 			// 응답 처리
-			const questionData = JSON.parse(response.choices[0].message.content)
+			newQuestionData = JSON.parse(response.choices[0].message.content)
 
-			// Firebase에 생성된 질문 저장 (선택 사항)
-			await set(ref(database, `rooms/${roomId}/balanceGameQuestion`), {
-				...questionData,
-				timestamp: new Date().toISOString(),
-			})
+			// 기존 질문과 다른지 확인
+			attempts++
+		} while (
+			attempts < 5 &&
+			lastQuestion &&
+			newQuestionData.question === lastQuestion.question
+		)
 
-			console.log(
-				`Generated balance game question for room ${roomId}:`,
-				questionData,
-			)
-
-			// 질문 데이터 반환
-			return { status: 200, questionData }
+		if (newQuestionData.question === lastQuestion?.question) {
+			// 너무 많이 시도했을 경우 오류 반환
+			console.log('Failed to generate a new unique question.')
+			return {
+				status: 500,
+				error: 'Could not generate a unique balance game question.',
+			}
 		}
+
+		// Firebase에 새로운 질문 저장
+		await set(ref(database, `rooms/${roomId}/balanceGameQuestion`), {
+			...newQuestionData,
+			timestamp: new Date().toISOString(),
+		})
+
+		console.log(
+			`Generated new balance game question for room ${roomId}:`,
+			newQuestionData,
+		)
+
+		return { status: 200, questionData: newQuestionData }
 	} catch (error) {
 		console.error('Error generating balance game question:', error)
 		return {
