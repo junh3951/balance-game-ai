@@ -1,5 +1,5 @@
 // src/data/api/getBalanceGameQuestion.js
-import { ref, set, get } from 'firebase/database'
+import { ref, set, get, remove } from 'firebase/database'
 import { database } from '@/data/firebase'
 import OpenAI from 'openai'
 
@@ -325,6 +325,40 @@ export async function getOrGenerateBalanceGameQuestion(roomId, level, isHost) {
 		return {
 			status: 500,
 			error: 'Failed to generate balance game question',
+		}
+	}
+}
+
+// 밸런스 게임 질문을 비우고 새로 생성하는 함수
+export async function regenerateBalanceGameQuestion(roomId, level, isHost) {
+	try {
+		// Firebase에서 기존 balanceGameQuestion 비우기
+		const questionRef = ref(database, `rooms/${roomId}/balanceGameQuestion`)
+		await remove(questionRef)
+		console.log(`Removed existing balance game question for room ${roomId}`)
+
+		// 새로운 질문을 생성하는 함수 호출
+		const response = await getOrGenerateBalanceGameQuestion(
+			roomId,
+			level,
+			isHost,
+		)
+
+		if (response.status === 200) {
+			console.log(
+				`New balance game question generated for room ${roomId}:`,
+				response.questionData,
+			)
+			return { status: 200, questionData: response.questionData }
+		} else {
+			console.error('Failed to generate a new question:', response.error)
+			return { status: response.status, error: response.error }
+		}
+	} catch (error) {
+		console.error('Error regenerating balance game question:', error)
+		return {
+			status: 500,
+			error: 'Failed to regenerate balance game question',
 		}
 	}
 }
