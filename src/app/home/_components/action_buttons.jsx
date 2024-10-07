@@ -35,7 +35,7 @@ export default function ActionButtons({ isActive }) {
 				<button
 					onClick={handleCreateRoom}
 					disabled={!isActive}
-					className={`button w-40 h-16 rounded-lg select-none transition-all duration-150 border-b-[1px] ${
+					className={`button w-80 h-16 rounded-lg select-none transition-all duration-150 border-b-[1px] ${
 						isActive
 							? 'bg-gradient-to-r from-[#4A4A4A] to-[#6A6A6A] cursor-pointer text-white [box-shadow:0_10px_0_0_#4A4A4A,0_15px_0_0_#6A6A6A] active:translate-y-2 active:[box-shadow:0_0px_0_0_#4A4A4A,0_0px_0_0_#6A6A6A] active:border-b-[0px] border-[#5A5A5A]'
 							: 'bg-gray-400 cursor-not-allowed text-gray-200 border-gray-400'
@@ -48,7 +48,7 @@ export default function ActionButtons({ isActive }) {
 				</button>
 
 				{/* 두 번째 버튼 - 약간 더 어두운 색과 #4A4A4A 텍스트 */}
-				<button
+				{/* <button
 					onClick={handleGotoCommunity}
 					disabled={!isActive}
 					className={`button w-40 h-16 rounded-lg select-none transition-all duration-150 border-b-[1px] ${
@@ -61,7 +61,7 @@ export default function ActionButtons({ isActive }) {
 					<span className="flex flex-col justify-center items-center h-full font-bold text-lg">
 						커뮤니티
 					</span>
-				</button>
+				</button> */}
 			</div>
 		</div>
 	)
