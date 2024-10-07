@@ -47,6 +47,11 @@ export default function BalanceGamePage() {
 						)
 
 					if (questionResponse.status === 200) {
+						console.log('QuestionResponse:', questionResponse)
+						console.log(
+							'Question data:',
+							questionResponse.questionData,
+						)
 						setQuestionData(questionResponse.questionData)
 					} else if (questionResponse.status === 202) {
 						// Not the host and question hasn't been generated yet

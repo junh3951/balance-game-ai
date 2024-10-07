@@ -48,7 +48,7 @@ export async function getSelectedCategory(roomId) {
 }
 
 // GPT-4를 사용하여 밸런스 게임 질문을 생성하는 함수
-export async function generateBalanceGameQuestion(roomId, level, isHost) {
+export async function getOrGenerateBalanceGameQuestion(roomId, level, isHost) {
 	try {
 		// Reference to the question in the database
 		const questionRef = ref(database, `rooms/${roomId}/balanceGameQuestion`)
@@ -304,7 +304,7 @@ export async function generateBalanceGameQuestion(roomId, level, isHost) {
 			})
 
 			// 응답 처리
-			const questionData = response.choices[0].message.content // 필요한 경우 응답에서 데이터를 추출하세요
+			const questionData = JSON.parse(response.choices[0].message.content)
 
 			// Firebase에 생성된 질문 저장 (선택 사항)
 			await set(ref(database, `rooms/${roomId}/balanceGameQuestion`), {
