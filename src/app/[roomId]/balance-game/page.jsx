@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useRecoilValue } from 'recoil'
 import { userNameState } from '@/recoil/atoms'
-import { generateBalanceGameQuestion } from '@/data/api/getBalanceGameQuestion'
+import { getOrGenerateBalanceGameQuestion } from '@/data/api/getBalanceGameQuestion'
 import {
 	getRoomData,
 	setSelectedOption,
@@ -14,18 +14,20 @@ import {
 } from '@/data/api/statemanager'
 import Header from './_components/header'
 import OptionButton from './_components/option_button'
+import { onValue, ref } from 'firebase/database'
+import { database } from '@/data/firebase'
 
 export default function BalanceGamePage() {
 	const router = useRouter()
 	const { roomId } = useParams()
-	const userName = useRecoilValue(userNameState) // Removed array destructuring to make sure it's not conditional
+	const userName = useRecoilValue(userNameState)
 	const [roomData, setRoomData] = useState(null)
 	const [questionData, setQuestionData] = useState(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
-	const [selectedOption, setSelectedoptionState] = useState(null) //선택한 옵션을 저장할 상태 추가
+	const [selectedOption, setSelectedOptionState] = useState(null)
 
-	// Fetch room data and question
+	// Fetch room data and determine if the user is the host
 	useEffect(() => {
 		const fetchRoomDataAndQuestion = async () => {
 			try {
@@ -34,26 +36,39 @@ export default function BalanceGamePage() {
 					const fetchedRoomData = response.roomData
 					setRoomData(fetchedRoomData)
 
-					if (fetchedRoomData.selectedCategory) {
-						const level = fetchedRoomData.selectedCategory
-						const questionResponse =
-							await generateBalanceGameQuestion(roomId, level)
+					const isHost = fetchedRoomData.hostName === userName
 
-						if (questionResponse.status === 200) {
-							const parsedQuestionData = JSON.parse(
-								questionResponse.questionData,
-							)
-							setQuestionData(parsedQuestionData)
-						} else {
-							setError('질문을 가져오는 데 실패했습니다.')
-						}
+					// Get or generate the question
+					const questionResponse =
+						await getOrGenerateBalanceGameQuestion(
+							roomId,
+							fetchedRoomData.selectedCategory,
+							isHost,
+						)
+
+					if (questionResponse.status === 200) {
+						setQuestionData(questionResponse.questionData)
+					} else if (questionResponse.status === 202) {
+						// Not the host and question hasn't been generated yet
+						// Set up a listener to wait for the question
+						const questionRef = ref(
+							database,
+							`rooms/${roomId}/balanceGameQuestion`,
+						)
+						onValue(questionRef, (snapshot) => {
+							if (snapshot.exists()) {
+								setQuestionData(snapshot.val())
+								setLoading(false)
+							}
+						})
 					} else {
-						setError('선택된 카테고리가 없습니다.')
+						setError('질문을 가져오는 데 실패했습니다.')
 					}
 				} else {
 					setError('방 정보를 가져오는 데 실패했습니다.')
 				}
 			} catch (err) {
+				console.error('Error:', err)
 				setError('데이터를 가져오는 중 오류가 발생했습니다.')
 			} finally {
 				setLoading(false)
@@ -61,7 +76,7 @@ export default function BalanceGamePage() {
 		}
 
 		fetchRoomDataAndQuestion()
-	}, [roomId])
+	}, [roomId, userName])
 
 	// Handle stage changes
 	useEffect(() => {
@@ -72,11 +87,11 @@ export default function BalanceGamePage() {
 		}
 
 		onStageChange(roomId, handleStageChange)
-	}, [roomId, router]) // Hooks called outside any condition or loop
+	}, [roomId, router])
 
 	// Option select function
 	const handleOptionSelect = async (selectedOption) => {
-		setSelectedoptionState(selectedOption) // 선택된 옵션 상태 업데이트
+		setSelectedOptionState(selectedOption)
 		await setSelectedOption(roomId, userName, selectedOption)
 		await saveOptionClick(roomId, userName, selectedOption)
 		console.log(`사용자가 선택한 옵션: ${selectedOption}`)

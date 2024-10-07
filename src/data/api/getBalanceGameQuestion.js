@@ -48,10 +48,30 @@ export async function getSelectedCategory(roomId) {
 }
 
 // GPT-4를 사용하여 밸런스 게임 질문을 생성하는 함수
-export async function generateBalanceGameQuestion(roomId, level) {
+export async function generateBalanceGameQuestion(roomId, level, isHost) {
 	try {
-		// 시스템 프롬프트 설정
-		const systemPrompt = `
+		// Reference to the question in the database
+		const questionRef = ref(database, `rooms/${roomId}/balanceGameQuestion`)
+		const snapshot = await get(questionRef)
+		if (snapshot.exists()) {
+			// Question already exists, return it
+			const questionData = snapshot.val()
+			console.log(
+				`Fetched existing balance game question for room ${roomId}:`,
+				questionData,
+			)
+			return { status: 200, questionData }
+		} else {
+			// If user is not the host, they should wait for the host to generate the question
+			if (!isHost) {
+				return {
+					status: 202,
+					message: 'Waiting for host to generate the question.',
+				}
+			}
+
+			// 시스템 프롬프트 설정
+			const systemPrompt = `
 ---
 ### 역할부여  
 너는 사용자가 선택한 난이도에 맞춰 밸런스 게임 질문을 생성하는 벨런스게임 생성기야. 사용자가 난이도를 설정하면, 너는 아래 규칙 모두 준수하여 밸런스 게임을 한번에 1개씩 제공해야 해. 난이도는 순한맛, 중간맛, 매운맛이 있어. 각 난이도의 특징과 예시를 제시할거야. 너는 이걸 반영하면 돼.
@@ -261,44 +281,45 @@ export async function generateBalanceGameQuestion(roomId, level) {
   "option2": "평생 동안 뜨거운 물로만 샤워하기"
 }
 `
-		const response = await openai.chat.completions.create({
-			model: 'gpt-4o', // 모델 이름은 필요에 따라 변경하세요
-			messages: [
-				{
-					role: 'system',
-					content: systemPrompt,
+			const response = await openai.chat.completions.create({
+				model: 'gpt-4o', // 모델 이름은 필요에 따라 변경하세요
+				messages: [
+					{
+						role: 'system',
+						content: systemPrompt,
+					},
+					{
+						role: 'user',
+						content: JSON.stringify({ level: level }),
+					},
+				],
+				temperature: 1.1,
+				max_tokens: 4095,
+				top_p: 1,
+				frequency_penalty: 0,
+				presence_penalty: 0,
+				response_format: {
+					type: 'json_object',
 				},
-				{
-					role: 'user',
-					content: JSON.stringify({ level: level }),
-				},
-			],
-			temperature: 1.1,
-			max_tokens: 4095,
-			top_p: 1,
-			frequency_penalty: 0,
-			presence_penalty: 0,
-			response_format: {
-				type: 'json_object',
-			},
-		})
+			})
 
-		// 응답 처리
-		const questionData = response.choices[0].message.content // 필요한 경우 응답에서 데이터를 추출하세요
+			// 응답 처리
+			const questionData = response.choices[0].message.content // 필요한 경우 응답에서 데이터를 추출하세요
 
-		// Firebase에 생성된 질문 저장 (선택 사항)
-		await set(ref(database, `rooms/${roomId}/balanceGameQuestion`), {
-			...questionData,
-			timestamp: new Date().toISOString(),
-		})
+			// Firebase에 생성된 질문 저장 (선택 사항)
+			await set(ref(database, `rooms/${roomId}/balanceGameQuestion`), {
+				...questionData,
+				timestamp: new Date().toISOString(),
+			})
 
-		console.log(
-			`Generated balance game question for room ${roomId}:`,
-			questionData,
-		)
+			console.log(
+				`Generated balance game question for room ${roomId}:`,
+				questionData,
+			)
 
-		// 질문 데이터 반환
-		return { status: 200, questionData }
+			// 질문 데이터 반환
+			return { status: 200, questionData }
+		}
 	} catch (error) {
 		console.error('Error generating balance game question:', error)
 		return {
