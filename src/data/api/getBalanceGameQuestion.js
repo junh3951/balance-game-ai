@@ -320,15 +320,6 @@ export async function getOrGenerateBalanceGameQuestion(roomId, level, isHost) {
 			newQuestionData.question === lastQuestion.question
 		)
 
-		if (newQuestionData.question === lastQuestion?.question) {
-			// 너무 많이 시도했을 경우 오류 반환
-			console.log('Failed to generate a new unique question.')
-			return {
-				status: 500,
-				error: 'Could not generate a unique balance game question.',
-			}
-		}
-
 		// Firebase에 새로운 질문 저장
 		await set(ref(database, `rooms/${roomId}/balanceGameQuestion`), {
 			...newQuestionData,
