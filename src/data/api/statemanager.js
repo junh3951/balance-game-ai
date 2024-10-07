@@ -140,7 +140,6 @@ export function onCategoryClickChange(roomId, callback) {
 	})
 }
 
-// 가장 많이 선택된 카테고리를 결정하는 함수
 export async function determineSelectedCategory(roomId) {
 	try {
 		const roomRef = ref(database, `rooms/${roomId}`)
@@ -159,6 +158,8 @@ export async function determineSelectedCategory(roomId) {
 
 			participants.forEach((participant) => {
 				const selectedCategory = participant.selectedCategory
+
+				// `selectedCategory`가 정의되지 않았거나 빈 값인 경우 건너뜀
 				if (
 					selectedCategory &&
 					categoryCounts.hasOwnProperty(selectedCategory)
@@ -314,6 +315,8 @@ export async function determineSelectedOption(roomId) {
 			Object.entries(participants).forEach(([_, participant]) => {
 				// 'id' 필드를 사용해 저장
 				const voterId = participant.id
+
+				// 선택된 옵션이 있는 경우에만 집계
 				if (participant.selectedOption === 'option1') {
 					option1Count++
 					option1Voters.push(voterId) // option1 선택자 추가
