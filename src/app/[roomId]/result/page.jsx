@@ -9,6 +9,7 @@ import {
 	getRoomData,
 	onStageChange,
 } from '@/data/api/statemanager'
+import { getOrGenerateBalanceGameQuestion } from '@/data/api/getBalanceGameQuestion'
 import { userNameState, roomDataState } from '@/recoil/atoms'
 import Header from './_components/header'
 import OptionButton from './_components/option_button'
@@ -20,6 +21,7 @@ export default function ResultPage() {
 	const { roomId } = useParams()
 	const userName = useRecoilValue(userNameState)
 	const [resultData, setResultData] = useState(null)
+	const [questionData, setQuestionData] = useState(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
 	const [roomData, setRoomData] = useRecoilState(roomDataState)
@@ -35,15 +37,27 @@ export default function ResultPage() {
 		fetchRoomData()
 	}, [roomId, setRoomData])
 
-	// Fetch result data
+	// Fetch result data and question data
 	useEffect(() => {
-		const fetchResultData = async () => {
+		const fetchResultAndQuestionData = async () => {
 			try {
-				const response = await determineSelectedOption(roomId)
-				if (response.status === 200) {
-					setResultData(response.result)
+				const resultResponse = await determineSelectedOption(roomId)
+				if (resultResponse.status === 200) {
+					setResultData(resultResponse.result)
 				} else {
 					setError('결과를 가져오는 데 실패했습니다.')
+				}
+
+				// Fetch the game question (isHost = false, to not regenerate)
+				const questionResponse = await getOrGenerateBalanceGameQuestion(
+					roomId,
+					'',
+					false,
+				)
+				if (questionResponse.status === 200) {
+					setQuestionData(questionResponse.questionData)
+				} else {
+					setError('질문을 가져오는 데 실패했습니다.')
 				}
 			} catch (err) {
 				setError('데이터를 가져오는 중 오류가 발생했습니다.')
@@ -52,7 +66,7 @@ export default function ResultPage() {
 			}
 		}
 
-		fetchResultData()
+		fetchResultAndQuestionData()
 	}, [roomId])
 
 	// Handle stage change and move all participants to the new stage
@@ -72,24 +86,31 @@ export default function ResultPage() {
 
 	// Option voters rendering function
 	const renderVoters = (optionVoters = []) => {
-		if (optionVoters.length === 0) return <p>선택한 사람이 없습니다.</p>
-		return <p>선택한 사람: {optionVoters.join(', ')}</p>
+		if (optionVoters.length === 0) return <p>아무도 없었습니다..</p>
+		return <p>{optionVoters.join(', ')}</p>
 	}
 
 	// Final result rendering function
 	const renderFinalResult = () => {
 		if (resultData?.result === 'draw') {
-			return <Header text="결과는 무승부입니다!" />
+			return (
+				<Header
+					text={questionData?.question}
+					finalOption="이븐하게 익었네요..(무승부)"
+				/>
+			)
 		}
 		const winner =
-			resultData?.result === 'option1' ? 'Option 1' : 'Option 2'
-		return <Header text={`최종 승리: ${winner}!`} />
+			resultData?.result === 'option1'
+				? questionData?.option1
+				: questionData?.option2
+		return <Header text={questionData?.question} finalOption={winner} />
 	}
 
 	return (
 		<div className="flex flex-col items-center min-h-screen p-4">
 			{/* 헤더는 항상 유지 */}
-			<div className="w-48 mb-12">
+			<div className="w-48 mb-8">
 				<h1 className="text-2xl font-bold mt-8 break-words text-center">
 					밸런스 게임 결과
 				</h1>
@@ -100,10 +121,19 @@ export default function ResultPage() {
 				<div className="flex items-center">
 					<OptionButton
 						optionText={
-							<>
-								Option 1 <br /> (득표 수:{' '}
-								{resultData?.option1Count || '0'})
-							</>
+							questionData ? (
+								<>
+									{questionData.option1}
+									<br />
+									(득표 수: {resultData?.option1Count || '0'})
+								</>
+							) : (
+								<>
+									A
+									<br />
+									(득표 수: {resultData?.option1Count || '0'})
+								</>
+							)
 						}
 						color="#2C2C2C"
 						textColor="#FFFFFF"
@@ -113,10 +143,19 @@ export default function ResultPage() {
 					/>
 					<OptionButton
 						optionText={
-							<>
-								Option 2 <br /> (득표 수:{' '}
-								{resultData?.option2Count || '0'})
-							</>
+							questionData ? (
+								<>
+									{questionData.option2}
+									<br />
+									(득표 수: {resultData?.option2Count || '0'})
+								</>
+							) : (
+								<>
+									B
+									<br />
+									(득표 수: {resultData?.option2Count || '0'})
+								</>
+							)
 						}
 						color="#F1F1F1"
 						textColor="#000000"
@@ -137,15 +176,11 @@ export default function ResultPage() {
 				{/* 각 옵션을 선택한 사람들 표시 */}
 				<div className="flex flex-col items-center gap-4">
 					<div className="p-4 rounded shadow-md w-80">
-						<h2 className="text-xl font-bold mb-2">
-							Option 1을 선택한 사람들
-						</h2>
+						<h2 className="text-xl font-bold mb-2">A</h2>
 						{renderVoters(resultData?.option1Voters)}
 					</div>
 					<div className="p-4 rounded shadow-md w-80">
-						<h2 className="text-xl font-bold mb-2">
-							Option 2를 선택한 사람들
-						</h2>
+						<h2 className="text-xl font-bold mb-2">B</h2>
 						{renderVoters(resultData?.option2Voters)}
 					</div>
 				</div>

@@ -38,14 +38,17 @@ const GibberishText = ({ text, className, animationDuration }) => {
 	)
 }
 
-export default function Header({ text }) {
+export default function Header({ text, finalOption }) {
 	return (
 		<div className="w-full">
-			<h1 className="text-2xl font-bold break-words text-center">
-				{' '}
+			<h2 className="break-words text-center">
 				<GibberishText text={text} animationDuration={40} />{' '}
-				{/* 애니메이션 시간을 늘림 */}
-			</h1>
+			</h2>
+			{finalOption && (
+				<h1 className="text-2xl font-bold text-center mt-1 mb-2 text-red-700">
+					<GibberishText text={finalOption} animationDuration={40} />{' '}
+				</h1>
+			)}
 		</div>
 	)
 }
