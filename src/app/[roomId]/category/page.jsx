@@ -1,4 +1,3 @@
-// src/app/[roomId]/category/page.jsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -8,13 +7,21 @@ import { selectedCategoriesState, userNameState } from '@/recoil/atoms'
 import CategoryButton from './_components/category_button'
 import Header from './_components/header'
 import TrafficLight from './_components/traffic_light'
-import { setSelectedCategory, onStageChange } from '@/data/api/statemanager'
+import {
+	setSelectedCategory,
+	onStageChange,
+	trackCategorySelection,
+} from '@/data/api/statemanager'
 
 export default function CategoryPage() {
 	const [selectedCategories, setSelectedCategories] = useRecoilState(
 		selectedCategoriesState,
 	)
 	const [userName] = useRecoilState(userNameState)
+	const [progress, setProgress] = useState({
+		selectedCount: 0,
+		totalParticipants: 0,
+	})
 	const router = useRouter()
 	const { roomId } = useParams() // roomId 가져오기
 	const categories = ['순한맛', '중간맛', '매운맛'] // 주제 자극도 설정
@@ -22,7 +29,10 @@ export default function CategoryPage() {
 	useEffect(() => {
 		// 선택된 카테고리 초기화
 		setSelectedCategories([])
-	}, [])
+
+		// Track category selection progress in real-time
+		trackCategorySelection(roomId, setProgress)
+	}, [roomId])
 
 	// 카테고리 선택 토글
 	const toggleCategory = async (category) => {
@@ -46,7 +56,7 @@ export default function CategoryPage() {
 	return (
 		<div className="flex flex-col items-center min-h-screen p-4">
 			<Header />
-			<h1 className="text-l mt-4">매울수록 부모님과 함께할 수 없어요</h1>
+			<h1 className="text-l mt-4">매운 맛일수록 쎈 질문이 나와요!</h1>
 			<div className="mt-20" />
 			<TrafficLight roomId={roomId} /> {/* roomId 전달 */}
 			<div className="mt-10" />
@@ -60,6 +70,13 @@ export default function CategoryPage() {
 						toggleCategory={toggleCategory}
 					/>
 				))}
+			</div>
+			{/* Real-time category selection progress */}
+			<div className="mt-8">
+				<p>
+					{progress.selectedCount} / {progress.totalParticipants} 명이
+					카테고리를 선택했습니다.
+				</p>
 			</div>
 			<div className="mt-20" />
 		</div>

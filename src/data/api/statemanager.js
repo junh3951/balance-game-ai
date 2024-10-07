@@ -365,6 +365,58 @@ export async function determineSelectedOption(roomId) {
 	}
 }
 
+// Function to track how many participants selected a category in real-time
+export async function trackCategorySelection(roomId, callback) {
+	try {
+		const roomRef = ref(database, `rooms/${roomId}/participants`)
+		onValue(roomRef, (snapshot) => {
+			if (snapshot.exists()) {
+				const participants = snapshot.val()
+				let totalParticipants = Object.keys(participants).length
+				let selectedCount = 0
+
+				// Count how many participants have selected a category
+				Object.values(participants).forEach((participant) => {
+					if (participant.selectedCategory) {
+						selectedCount++
+					}
+				})
+
+				// Provide data to the callback
+				callback({ selectedCount, totalParticipants })
+			}
+		})
+	} catch (error) {
+		console.error('Error tracking category selection:', error)
+	}
+}
+
+// Function to track how many participants selected an option in real-time
+export async function trackOptionSelection(roomId, callback) {
+	try {
+		const roomRef = ref(database, `rooms/${roomId}/participants`)
+		onValue(roomRef, (snapshot) => {
+			if (snapshot.exists()) {
+				const participants = snapshot.val()
+				let totalParticipants = Object.keys(participants).length
+				let selectedCount = 0
+
+				// Count how many participants have selected an option
+				Object.values(participants).forEach((participant) => {
+					if (participant.selectedOption) {
+						selectedCount++
+					}
+				})
+
+				// Provide data to the callback
+				callback({ selectedCount, totalParticipants })
+			}
+		})
+	} catch (error) {
+		console.error('Error tracking option selection:', error)
+	}
+}
+
 // 카운트다운 설정
 export async function setCountdown(roomId, countdownValue) {
 	try {

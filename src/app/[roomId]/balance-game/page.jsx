@@ -1,4 +1,3 @@
-// src/app/[roomId]/balance-game/page.jsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -11,6 +10,7 @@ import {
 	setSelectedOption,
 	saveOptionClick,
 	onStageChange,
+	trackOptionSelection, // Import the real-time tracking function
 } from '@/data/api/statemanager'
 import Header from './_components/header'
 import OptionButton from './_components/option_button'
@@ -23,9 +23,12 @@ export default function BalanceGamePage() {
 	const userName = useRecoilValue(userNameState)
 	const [roomData, setRoomData] = useState(null)
 	const [questionData, setQuestionData] = useState(null)
-	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
 	const [selectedOption, setSelectedOptionState] = useState(null)
+	const [progress, setProgress] = useState({
+		selectedCount: 0,
+		totalParticipants: 0,
+	}) // Add state for progress tracking
 
 	// Fetch room data and determine if the user is the host
 	useEffect(() => {
@@ -47,11 +50,6 @@ export default function BalanceGamePage() {
 						)
 
 					if (questionResponse.status === 200) {
-						console.log('QuestionResponse:', questionResponse)
-						console.log(
-							'Question data:',
-							questionResponse.questionData,
-						)
 						setQuestionData(questionResponse.questionData)
 					} else if (questionResponse.status === 202) {
 						// Not the host and question hasn't been generated yet
@@ -63,7 +61,6 @@ export default function BalanceGamePage() {
 						onValue(questionRef, (snapshot) => {
 							if (snapshot.exists()) {
 								setQuestionData(snapshot.val())
-								setLoading(false)
 							}
 						})
 					} else {
@@ -75,12 +72,13 @@ export default function BalanceGamePage() {
 			} catch (err) {
 				console.error('Error:', err)
 				setError('데이터를 가져오는 중 오류가 발생했습니다.')
-			} finally {
-				setLoading(false)
 			}
 		}
 
 		fetchRoomDataAndQuestion()
+
+		// Track option selection progress in real-time
+		trackOptionSelection(roomId, setProgress)
 	}, [roomId, userName])
 
 	// Handle stage changes
@@ -102,43 +100,51 @@ export default function BalanceGamePage() {
 		console.log(`사용자가 선택한 옵션: ${selectedOption}`)
 	}
 
-	if (loading) {
-		return <div>질문을 불러오는 중입니다...</div>
-	}
-
 	if (error) {
 		return <div>오류: {error}</div>
 	}
 
-	if (!questionData) {
-		return <div>질문이 없습니다.</div>
-	}
-
+	// 기존 questionData가 있으면 유지, 없으면 처음 렌더링
 	return (
 		<div className="flex flex-col items-center min-h-screen p-4">
-			<div className="w-48 mb-12">
-				<Header text={questionData.question} />
-			</div>
-			<div className="flex">
-				<OptionButton
-					optionText={questionData.option1}
-					color="#2C2C2C"
-					textColor="#FFFFFF"
-					borderRadius="20px 0px 0px 20px"
-					direction="left"
-					isSelected={selectedOption === 'option1'}
-					onSelect={() => handleOptionSelect('option1')}
-				/>
-				<OptionButton
-					optionText={questionData.option2}
-					color="#F1F1F1"
-					textColor="#000000"
-					borderRadius="0px 20px 20px 0px"
-					direction="right"
-					isSelected={selectedOption === 'option2'}
-					onSelect={() => handleOptionSelect('option2')}
-				/>
-			</div>
+			{questionData ? (
+				<>
+					<div className="w-48 mb-12">
+						<Header text={questionData.question} />
+					</div>
+					<div className="flex">
+						<OptionButton
+							optionText={questionData.option1}
+							color="#2C2C2C"
+							textColor="#FFFFFF"
+							borderRadius="20px 0px 0px 20px"
+							direction="left"
+							isSelected={selectedOption === 'option1'}
+							onSelect={() => handleOptionSelect('option1')}
+						/>
+						<OptionButton
+							optionText={questionData.option2}
+							color="#F1F1F1"
+							textColor="#000000"
+							borderRadius="0px 20px 20px 0px"
+							direction="right"
+							isSelected={selectedOption === 'option2'}
+							onSelect={() => handleOptionSelect('option2')}
+						/>
+					</div>
+
+					{/* Real-time option selection progress */}
+					<div className="mt-8">
+						<p>
+							{progress.selectedCount} /{' '}
+							{progress.totalParticipants} 명이 선택했습니다.
+						</p>
+					</div>
+				</>
+			) : (
+				// 로딩 중이지만 이전 데이터가 없을 경우만 표시
+				<div>질문을 불러오는 중입니다...</div>
+			)}
 		</div>
 	)
 }
