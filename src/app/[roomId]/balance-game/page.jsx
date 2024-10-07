@@ -23,6 +23,7 @@ export default function BalanceGamePage() {
 	const [questionData, setQuestionData] = useState(null)
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
+	const [selectedOption, setSelectedoptionState] = useState(null) //선택한 옵션을 저장할 상태 추가
 
 	// Fetch room data and question
 	useEffect(() => {
@@ -75,6 +76,7 @@ export default function BalanceGamePage() {
 
 	// Option select function
 	const handleOptionSelect = async (selectedOption) => {
+		setSelectedoptionState(selectedOption) // 선택된 옵션 상태 업데이트
 		await setSelectedOption(roomId, userName, selectedOption)
 		await saveOptionClick(roomId, userName, selectedOption)
 		console.log(`사용자가 선택한 옵션: ${selectedOption}`)
@@ -104,6 +106,7 @@ export default function BalanceGamePage() {
 					textColor="#FFFFFF"
 					borderRadius="20px 0px 0px 20px"
 					direction="left"
+					isSelected={selectedOption === 'option1'}
 					onSelect={() => handleOptionSelect('option1')}
 				/>
 				<OptionButton
@@ -112,6 +115,7 @@ export default function BalanceGamePage() {
 					textColor="#000000"
 					borderRadius="0px 20px 20px 0px"
 					direction="right"
+					isSelected={selectedOption === 'option2'}
 					onSelect={() => handleOptionSelect('option2')}
 				/>
 			</div>
