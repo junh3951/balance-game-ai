@@ -165,7 +165,6 @@ export async function generateBalanceGameQuestion(roomId, level) {
 ** 중간맛 질문 예시
 술 마시고 필름 끊긴 상태에서 전남친, 전여친 전화 30통 vs 직장 상사와 통화 내역 5분
 트림할 때 방귀소리 VS 방귀 뀔 때 트림 소리
-
 애인에게 끼 부리는 절친 VS 절친에게 끼부리는 애인
 30억 있는 돌싱 VS 백만 원 있는 이상형
 평생동안 애인없이 살기 vs 평생동안 친구없이 살기
