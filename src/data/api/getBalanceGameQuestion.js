@@ -1,3 +1,5 @@
+// src/data/api/getBalanceGameQuestion.js
+
 import { ref, set, get, remove } from 'firebase/database'
 import { database } from '@/data/firebase'
 import OpenAI from 'openai'

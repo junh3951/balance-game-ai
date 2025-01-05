@@ -1,3 +1,4 @@
+// src/app/[roomId]/balance-game/page.jsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -72,33 +73,37 @@ export default function BalanceGamePage() {
 				if (response.status === 200) {
 					const fetchedRoomData = response.roomData
 					setRoomData(fetchedRoomData)
-
+		
 					const isHost = fetchedRoomData.hostName === userName
-
-					// Get or generate the question
-					const questionResponse =
-						await getOrGenerateBalanceGameQuestion(
+		
+					// Firebase에서 현재 질문을 확인
+					const questionRef = ref(database, `rooms/${roomId}/balanceGameQuestion`)
+					const questionSnapshot = await get(questionRef)
+		
+					if (questionSnapshot.exists()) {
+						// 기존 질문이 있으면 그대로 사용
+						setQuestionData(questionSnapshot.val())
+						console.log("Existing question reused:", questionSnapshot.val())
+					} else if (isHost) {
+						// 호스트이면서 질문이 없는 경우에만 새 질문 생성
+						const questionResponse = await getOrGenerateBalanceGameQuestion(
 							roomId,
 							fetchedRoomData.selectedCategory,
 							isHost,
 						)
-
-					if (questionResponse.status === 200) {
-						setQuestionData(questionResponse.questionData)
-					} else if (questionResponse.status === 202) {
-						// Not the host and question hasn't been generated yet
-						// Set up a listener to wait for the question
-						const questionRef = ref(
-							database,
-							`rooms/${roomId}/balanceGameQuestion`,
-						)
+		
+						if (questionResponse.status === 200) {
+							setQuestionData(questionResponse.questionData)
+						} else {
+							setError('질문을 가져오는 데 실패했습니다.')
+						}
+					} else {
+						// 호스트가 아닌 경우, 질문을 기다림 (실시간 리스너)
 						onValue(questionRef, (snapshot) => {
 							if (snapshot.exists()) {
 								setQuestionData(snapshot.val())
 							}
 						})
-					} else {
-						setError('질문을 가져오는 데 실패했습니다.')
 					}
 				} else {
 					setError('방 정보를 가져오는 데 실패했습니다.')
