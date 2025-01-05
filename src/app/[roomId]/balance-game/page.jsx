@@ -20,7 +20,7 @@ import {
 } from '@/data/api/statemanager'
 import Header from './_components/header'
 import OptionButton from './_components/option_button'
-import { onValue, ref } from 'firebase/database'
+import { onValue, ref, get } from 'firebase/database'
 import { database } from '@/data/firebase'
 
 export default function BalanceGamePage() {
